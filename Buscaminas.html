@@ -1,351 +1,386 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> 
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width initial-scale=1.0">
     <title>Buscaminas</title>
+
 </head>
 
 <body>
-        <canvas id="lienzo" style="border: 2px solid black;" onclick="hacerClick()"
-            oncontextmenu="clickDerecho();return false;">
-            Canvas element not supported.
-        </canvas>
-        <br>
-        <button type="button" onclick="iniciar()">Reiniciar</button>
-        <label>Dificultad:</label>
-        <select id="dificultad" onchange="seleccionarDificultad()">
-            <option value="1" selected>Facil</option>
-            <option value="2">Medio</option>
-            <option value="3">Dificil</option>
-        </select>
-        <label>Minas restantes: </label>
-        <span id="restMinas"></span>
+    <style>
+        .center {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <div>
+        <div class="center">
+            <button type="button" onclick="iniciar()">Reiniciar</button>
+            <label>Minas restantes: </label>
+            <span id="restMinas"></span>
+        </div>
+        <div class="center">
+            <canvas id="lienzo" style="border: 2px solid black;" onclick="hacerClick()"
+                oncontextmenu="clickDerecho();return false;">
+                Canvas element not supported.
+            </canvas>
+        </div>
+        <div class="center">
+            <label>Dificultad:</label>
+            <select id="dificultad" onchange="seleccionarDificultad()">
+                <option value="1" selected>Facil</option>
+                <option value="2">Medio</option>
+                <option value="3">Dificil</option>
+            </select>
+            <label>Tamaño:</label>
+            <select id="cambiarTamaño" onchange="cambiarTamaño()">
+                <option value="1">Pequeño</option>
+                <option value="2" selected>Normal</option>
+                <option value="3">Grande</option>
+            </select>
+        </div>
 
 
-        <script>
 
-            //Oculto
-            const LAST_BOMBA = 12;
-            const BOMBA = 13;
-            const OC_BOMBA = 14;
-            const BAND_BOMB = 15;
-            const INTE_BOMB = 16;
+    </div>
 
-            const OC_NADA = 9;
-            const BAND_NADA = 10;
-            const INTE_NADA = 11;
-            var ancho = 8; //x
-            var alto = 8;  //y
-            var cantBombas = 10;
-            var tamañoCuadrado = 30;
-            var campo = [];
-            var cantCavados = 0;
-            var cantBanderas = 0;
-            var lienzo = document.getElementById("lienzo");
-            var ctx = lienzo.getContext('2d');
 
-            var fin = false;
+    <script>
 
+        //Oculto
+        const LAST_BOMBA = 12;
+        const BOMBA = 13;
+        const OC_BOMBA = 14;
+        const BAND_BOMB = 15;
+        const INTE_BOMB = 16;
+
+        const OC_NADA = 9;
+        const BAND_NADA = 10;
+        const INTE_NADA = 11;
+        var ancho = 8; //x
+        var alto = 8;  //y
+        var cantBombas = 10;
+        var tamañoCuadrado = 30;
+        var campo = [];
+        var cantCavados = 0;
+        var cantBanderas = 0;
+        var lienzo = document.getElementById("lienzo");
+        var ctx = lienzo.getContext('2d');
+
+        var fin = false;
+
+
+        iniciar();
+
+        //FUNCIONES
+
+        function iniciar() {
+            fin = false;
+
+            lienzo.width = tamañoCuadrado * ancho;
+            lienzo.height = tamañoCuadrado * alto;
+
+            //Creo la matriz y la inicializo con todos VACIO
+            for (var i = 0; i < ancho; i++) {
+                campo[i] = new Array(alto);
+                for (var j = 0; j < alto; j++)
+                    campo[i][j] = OC_NADA;
+            }
+
+            cantCavados = 0;
+            cantBanderas = 0;
+            //Agrego las bombas
+            var i = 0;
+            while (i < cantBombas) {
+                var x = Math.trunc(Math.random() * 100) % ancho;
+                var y = Math.trunc(Math.random() * 100) % alto;
+                if (campo[x][y] != OC_BOMBA) {
+                    campo[x][y] = OC_BOMBA;
+                    i++;
+                }
+            }
+            document.getElementById("restMinas").innerText = cantBombas - cantBanderas;
+
+            dibujarCampo();
+        }
+
+        function seleccionarDificultad() {
+            var select = document.getElementById("dificultad");
+            var diff = select.options[select.selectedIndex].value;
+
+            switch (diff) {
+                case "1":
+                    ancho = 8; //x
+                    alto = 8;  //y
+                    cantBombas = 10;
+                    break;
+                case "2":
+                    ancho = 16; //x
+                    alto = 16;  //y
+                    cantBombas = 40;
+                    break;
+                case "3":
+                    ancho = 16; //x
+                    alto = 30;  //y
+                    cantBombas = 99;
+                    break;
+                case "4":
+                    ancho = 40; //x
+                    alto = 40;  //y
+                    cantBombas = 500;
+                    break;
+            }
 
             iniciar();
+        }
 
+        function cambiarTamaño() {
+            var select = document.getElementById("cambiarTamaño");
+            var diff = select.options[select.selectedIndex].value;
 
-            function iniciar() {
-                fin = false;
-                lienzo.width = tamañoCuadrado * ancho;
-                lienzo.height = tamañoCuadrado * alto;
+            switch (diff) {
+                case "1":
+                    tamañoCuadrado = 25;
 
-                //Creo la matriz y la inicializo con todos VACIO
-                for (var i = 0; i < ancho; i++) {
-                    campo[i] = new Array(alto);
-                    for (var j = 0; j < alto; j++)
-                        campo[i][j] = OC_NADA;
-                }
+                    break;
+                case "2":
+                    tamañoCuadrado = 30;
 
-                cantCavados = 0;
-                cantBanderas = 0;
-                //Agrego las bombas
-                var i = 0;
-                while (i < cantBombas) {
-                    var x = Math.trunc(Math.random() * 100) % ancho;
-                    var y = Math.trunc(Math.random() * 100) % alto;
-                    if (campo[x][y] != OC_BOMBA) {
-                        campo[x][y] = OC_BOMBA;
-                        i++;
-                    }
-                }
-                document.getElementById("restMinas").innerText = cantBombas - cantBanderas;
+                    break;
+                case "3":
+                    tamañoCuadrado = 50;
 
-                dibujarCampo();
+                    break;
             }
+            lienzo.width = tamañoCuadrado * ancho;
+            lienzo.height = tamañoCuadrado * alto;
+            dibujarCampo();
+        }
 
-            function seleccionarDificultad() {
-                var select = document.getElementById("dificultad");
-                var diff = select.options[select.selectedIndex].value;
-
-                switch (diff) {
-                    case "1":
-                        ancho = 8; //x
-                        alto = 8;  //y
-                        cantBombas = 10;
-                        tamañoCuadrado = 30;
-                        break;
-                    case "2":
-                        ancho = 16; //x
-                        alto = 16;  //y
-                        cantBombas = 40;
-                        tamañoCuadrado = 20;
-                        break;
-                    case "3":
-                        ancho = 16; //x
-                        alto = 30;  //y
-                        cantBombas = 99;
-                        tamañoCuadrado = 20;
-                        break;
-                    case "4":
-                        ancho = 40; //x
-                        alto = 40;  //y
-                        cantBombas = 500;
-                        tamañoCuadrado = 20;
-                        break;
-                }
-
+        function hacerClick() {
+            if (fin) {
                 iniciar();
+                return;
             }
 
-            function hacerClick() {
-                if (fin) {
-                    iniciar();
-                    return;
-                }
-
-                var x = Math.trunc(ancho * (event.clientX - lienzo.offsetLeft + document.body.scrollLeft) / lienzo.width);
-                var y = Math.trunc(alto * (event.clientY - lienzo.offsetTop + document.body.scrollTop) / lienzo.height);
-                if (x >= ancho) x = ancho - 1;
-                if (y >= alto) x = alto - 1;
-                cavarPosicion(x, y);
-                if (campo[x][y] == BOMBA) {
-                    campo[x][y] = LAST_BOMBA;
-                    perdiste();
-                }
-                else {
-                    dibujarCampo();
-                    if ((cantCavados + cantBombas) == (alto * ancho))
-                        ganaste();
-                }
+            var x = Math.trunc(ancho * (event.clientX - lienzo.offsetLeft + document.body.scrollLeft) / lienzo.width);
+            var y = Math.trunc(alto * (event.clientY - lienzo.offsetTop + document.body.scrollTop) / lienzo.height);
+            if (x >= ancho) x = ancho - 1;
+            if (y >= alto) x = alto - 1;
+            cavarPosicion(x, y);
+            if (campo[x][y] == BOMBA) {
+                campo[x][y] = LAST_BOMBA;
+                perdiste();
             }
-
-            function clickDerecho() {
-                if (fin) {
-                    iniciar();
-                    return;
-                }
-                var x = Math.trunc(ancho * (event.clientX - lienzo.offsetLeft) / lienzo.width);
-                var y = Math.trunc(alto * (event.clientY - lienzo.offsetTop) / lienzo.height);
-
-                if (campo[x][y] == OC_BOMBA) {
-                    campo[x][y] = BAND_BOMB;
-                    cantBanderas += 1;
-                }
-                else if (campo[x][y] == BAND_BOMB) {
-                    campo[x][y] = INTE_BOMB;
-                    cantBanderas -= 1;
-                }
-                else if (campo[x][y] == INTE_BOMB)
-                    campo[x][y] = OC_BOMBA;
-
-                else if (campo[x][y] == OC_NADA) {
-                    campo[x][y] = BAND_NADA;
-                    cantBanderas += 1;
-                }
-                else if (campo[x][y] == BAND_NADA) {
-                    campo[x][y] = INTE_NADA;
-                    cantBanderas -= 1;
-                }
-                else if (campo[x][y] == INTE_NADA)
-                    campo[x][y] = OC_NADA;
-
-                document.getElementById("restMinas").innerText = cantBombas - cantBanderas;
-
+            else {
                 dibujarCampo();
+                if ((cantCavados + cantBombas) == (alto * ancho))
+                    ganaste();
             }
+        }
 
-            function cavarPosicion(x, y) {
-                if ((campo[x][y] == OC_BOMBA) || (campo[x][y] == INTE_BOMB)) {
-                    campo[x][y] = BOMBA;
-                }
-                else if ((campo[x][y] == OC_NADA) || (campo[x][y] == INTE_NADA)) {
-                    cantCavados++;
-                    /*
-                    console.log("Minas: " + cantBombas);
-                    console.log("Cavados: " + cantCavados);
-                    console.log("Total: " + (alto * ancho));*/
-                    campo[x][y] = calcularNumero(x, y);
-                    if (campo[x][y] == 0)
-                        cavarAlrededor(x, y);
-                }
+        function clickDerecho() {
+            if (fin) {
+                iniciar();
+                return;
             }
+            var x = Math.trunc(ancho * (event.clientX - lienzo.offsetLeft) / lienzo.width);
+            var y = Math.trunc(alto * (event.clientY - lienzo.offsetTop) / lienzo.height);
 
-            function perdiste() {
-                fin = true;
-                for (var i = 0; i < ancho; i++) {
-                    for (var j = 0; j < alto; j++) {
-                        cavarPosicion(i, j);
-                    }
-                }
-                dibujarCampo();
-
-                alert("Has perdido");
-
+            if (campo[x][y] == OC_BOMBA) {
+                campo[x][y] = BAND_BOMB;
+                cantBanderas += 1;
             }
-
-            function ganaste() {
-                fin = true;
-                for (var i = 0; i < ancho; i++) {
-                    for (var j = 0; j < alto; j++) {
-                        cavarPosicion(i, j);
-                    }
-                }
-                dibujarCampo();
-                alert("Has ganado");
+            else if (campo[x][y] == BAND_BOMB) {
+                campo[x][y] = INTE_BOMB;
+                cantBanderas -= 1;
             }
+            else if (campo[x][y] == INTE_BOMB)
+                campo[x][y] = OC_BOMBA;
 
-            function cavarAlrededor(x, y) {
-                if ((x > 0) && (y > 0)) cavarPosicion(x - 1, y - 1);
-                if ((y > 0)) cavarPosicion(x, y - 1);
-                if ((x < ancho - 1) && (y > 0)) cavarPosicion(x + 1, y - 1);
-                if ((x > 0)) cavarPosicion(x - 1, y);
-                if ((x < ancho - 1)) cavarPosicion(x + 1, y);
-                if ((x > 0) && (y < alto - 1)) cavarPosicion(x - 1, y + 1);
-                if ((y < alto - 1)) cavarPosicion(x, y + 1);
-                if ((x < ancho - 1) && (y < alto - 1)) cavarPosicion(x + 1, y + 1);
+            else if (campo[x][y] == OC_NADA) {
+                campo[x][y] = BAND_NADA;
+                cantBanderas += 1;
             }
-
-            function calcularNumero(x, y) {
-                var i = 0;
-                if ((x > 0) && (y > 0) && (campo[x - 1][y - 1] >= LAST_BOMBA)) i++;
-                if ((y > 0) && (campo[x][y - 1] >= LAST_BOMBA)) i++;
-                if ((x < ancho - 1) && (y > 0) && (campo[x + 1][y - 1] >= LAST_BOMBA)) i++;
-                if ((x > 0) && (campo[x - 1][y] >= LAST_BOMBA)) i++;
-                if ((x < ancho - 1) && (campo[x + 1][y] >= LAST_BOMBA)) i++;
-                if ((x > 0) && (y < alto - 1) && (campo[x - 1][y + 1] >= LAST_BOMBA)) i++;
-                if ((y < alto - 1) && (campo[x][y + 1] >= LAST_BOMBA)) i++;
-                if ((x < ancho - 1) && (y < alto - 1) && (campo[x + 1][y + 1] >= LAST_BOMBA)) i++;
-                return i;
+            else if (campo[x][y] == BAND_NADA) {
+                campo[x][y] = INTE_NADA;
+                cantBanderas -= 1;
             }
+            else if (campo[x][y] == INTE_NADA)
+                campo[x][y] = OC_NADA;
 
-            //Funciones de dibujo
-            function dibujarCampo() {
-                ctx.fillStyle = "#000000";
-                ctx.fillRect(0, 0, lienzo.width, lienzo.height);
+            document.getElementById("restMinas").innerText = cantBombas - cantBanderas;
 
-                for (var i = 0; i < ancho; i++) {
-                    for (var j = 0; j < alto; j++) {
-                        if ((campo[i][j] == OC_NADA) || (campo[i][j] == OC_BOMBA))
-                            dibujarOculto(i, j);
-                        if ((campo[i][j] >= 0) && (campo[i][j] <= 8))
-                            dibujarNumero(i, j, campo[i][j]);
-                        if (campo[i][j] == BOMBA)
-                            dibujarBomba(i, j);
-                        if ((campo[i][j] == BAND_BOMB) || (campo[i][j] == BAND_NADA))
-                            dibujarBanderita(i, j);
-                        if ((campo[i][j] == INTE_BOMB) || (campo[i][j] == INTE_NADA))
-                            dibujarInterrogacion(i, j);
-                        if (campo[i][j] == LAST_BOMBA)
-                            dibujarUltimaBomba(i, j);
-                    }
+            dibujarCampo();
+        }
+
+        function cavarPosicion(x, y) {
+            if ((campo[x][y] == OC_BOMBA) || (campo[x][y] == INTE_BOMB)) {
+                campo[x][y] = BOMBA;
+            }
+            else if ((campo[x][y] == OC_NADA) || (campo[x][y] == INTE_NADA)) {
+                cantCavados++;
+                /*
+                console.log("Minas: " + cantBombas);
+                console.log("Cavados: " + cantCavados);
+                console.log("Total: " + (alto * ancho));*/
+                campo[x][y] = calcularNumero(x, y);
+                if (campo[x][y] == 0)
+                    cavarAlrededor(x, y);
+            }
+        }
+
+        function perdiste() {
+            fin = true;
+            for (var i = 0; i < ancho; i++) {
+                for (var j = 0; j < alto; j++) {
+                    cavarPosicion(i, j);
                 }
             }
+            dibujarCampo();
+            //alert("Has perdido");
+        }
 
-
-            function dibujarOculto(x, y) {
-                dibujarFondoCuadrado(x, y, "#c0c0c0");
-            }
-
-            function dibujarNumero(x, y, num) {
-                dibujarFondoCuadrado(x, y, "#f2f2f2");
-                var anchoCuadrado = lienzo.width / ancho;
-                var altoCuadrado = lienzo.height / alto;
-                if (num > 0) {
-                    ctx.font = "bold 20px Comic Sans MS";
-                    if (num == 1)
-                        ctx.fillStyle = "blue";
-                    else if (num == 2)
-                        ctx.fillStyle = "green";
-                    else if (num == 3)
-                        ctx.fillStyle = "red";
-                    else if (num == 4)
-                        ctx.fillStyle = "MidnightBlue";
-                    else if (num == 5)
-                        ctx.fillStyle = "Maroon";
-                    else if (num == 6)
-                        ctx.fillStyle = "Turquoise";
-                    else if (num == 7)
-                        ctx.fillStyle = "black";
-                    else ctx.fillStyle = "gray";
-
-                    ctx.textAlign = "center";
-                    ctx.fillText(num, x * anchoCuadrado + anchoCuadrado / 2, y * altoCuadrado + altoCuadrado / 2 + 7)
+        function ganaste() {
+            fin = true;
+            for (var i = 0; i < ancho; i++) {
+                for (var j = 0; j < alto; j++) {
+                    cavarPosicion(i, j);
                 }
             }
+            dibujarCampo();
+            alert("Has ganado");
+        }
 
-            function dibujarBomba(x, y, num) {
-                dibujarFondoCuadrado(x, y, "#f2f2f2");
-                dibujarFormaBomba(x, y);
+        function cavarAlrededor(x, y) {
+            if ((x > 0) && (y > 0)) cavarPosicion(x - 1, y - 1);
+            if ((y > 0)) cavarPosicion(x, y - 1);
+            if ((x < ancho - 1) && (y > 0)) cavarPosicion(x + 1, y - 1);
+            if ((x > 0)) cavarPosicion(x - 1, y);
+            if ((x < ancho - 1)) cavarPosicion(x + 1, y);
+            if ((x > 0) && (y < alto - 1)) cavarPosicion(x - 1, y + 1);
+            if ((y < alto - 1)) cavarPosicion(x, y + 1);
+            if ((x < ancho - 1) && (y < alto - 1)) cavarPosicion(x + 1, y + 1);
+        }
+
+        function calcularNumero(x, y) {
+            var i = 0;
+            if ((x > 0) && (y > 0) && (campo[x - 1][y - 1] >= LAST_BOMBA)) i++;
+            if ((y > 0) && (campo[x][y - 1] >= LAST_BOMBA)) i++;
+            if ((x < ancho - 1) && (y > 0) && (campo[x + 1][y - 1] >= LAST_BOMBA)) i++;
+            if ((x > 0) && (campo[x - 1][y] >= LAST_BOMBA)) i++;
+            if ((x < ancho - 1) && (campo[x + 1][y] >= LAST_BOMBA)) i++;
+            if ((x > 0) && (y < alto - 1) && (campo[x - 1][y + 1] >= LAST_BOMBA)) i++;
+            if ((y < alto - 1) && (campo[x][y + 1] >= LAST_BOMBA)) i++;
+            if ((x < ancho - 1) && (y < alto - 1) && (campo[x + 1][y + 1] >= LAST_BOMBA)) i++;
+            return i;
+        }
+
+        //Funciones de dibujo
+        function dibujarCampo() {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, tamañoCuadrado * ancho, tamañoCuadrado * alto);
+
+            for (var i = 0; i < ancho; i++) {
+                for (var j = 0; j < alto; j++) {
+                    if ((campo[i][j] == OC_NADA) || (campo[i][j] == OC_BOMBA))
+                        dibujarOculto(i, j);
+                    if ((campo[i][j] >= 0) && (campo[i][j] <= 8))
+                        dibujarNumero(i, j, campo[i][j]);
+                    if (campo[i][j] == BOMBA)
+                        dibujarBomba(i, j);
+                    if ((campo[i][j] == BAND_BOMB) || (campo[i][j] == BAND_NADA))
+                        dibujarBanderita(i, j);
+                    if ((campo[i][j] == INTE_BOMB) || (campo[i][j] == INTE_NADA))
+                        dibujarInterrogacion(i, j);
+                    if (campo[i][j] == LAST_BOMBA)
+                        dibujarUltimaBomba(i, j);
+                }
             }
+        }
 
-            function dibujarUltimaBomba(x, y, num) {
-                dibujarFondoCuadrado(x, y, "#ff0000");
-                dibujarFormaBomba(x, y);
-            }
 
-            function dibujarFormaBomba(x, y) {
-                var anchoCuadrado = lienzo.width / ancho;
-                var altoCuadrado = lienzo.height / alto;
-                ctx.beginPath();
-                ctx.arc(x * anchoCuadrado + anchoCuadrado / 2, y * altoCuadrado + altoCuadrado / 2, tamañoCuadrado / 3, 0, 2 * Math.PI);
-                ctx.fillStyle = "black";
-                ctx.fill();
-            }
+        function dibujarOculto(x, y) {
+            dibujarFondoCuadrado(x, y, "#c0c0c0");
+        }
 
-            function dibujarFondoCuadrado(x, y, col) {
-                var anchoCuadrado = lienzo.width / ancho;
-                var altoCuadrado = lienzo.height / alto;
-                ctx.fillStyle = col;
-                ctx.fillRect(x * anchoCuadrado, y * altoCuadrado, Math.trunc(anchoCuadrado), Math.trunc(altoCuadrado));
-                ctx.fillStyle = "black";
-                ctx.strokeRect(x * anchoCuadrado, y * altoCuadrado, Math.trunc(anchoCuadrado), Math.trunc(altoCuadrado));
-            }
+        function dibujarNumero(x, y, num) {
+            dibujarFondoCuadrado(x, y, "#f2f2f2");
+            if (num > 0) {
+                ctx.font = "bold " + tamañoCuadrado / 2 + "px Comic Sans MS";
+                if (num == 1)
+                    ctx.fillStyle = "blue";
+                else if (num == 2)
+                    ctx.fillStyle = "green";
+                else if (num == 3)
+                    ctx.fillStyle = "red";
+                else if (num == 4)
+                    ctx.fillStyle = "MidnightBlue";
+                else if (num == 5)
+                    ctx.fillStyle = "Maroon";
+                else if (num == 6)
+                    ctx.fillStyle = "Turquoise";
+                else if (num == 7)
+                    ctx.fillStyle = "black";
+                else ctx.fillStyle = "gray";
 
-            function dibujarBanderita(x, y) {
-                dibujarFondoCuadrado(x, y, "#c0c0c0");
-                var anchoCuadrado = lienzo.width / ancho;
-                var altoCuadrado = lienzo.height / alto;
-
-                ctx.beginPath();
-                ctx.moveTo(x * anchoCuadrado + anchoCuadrado / 2, y * altoCuadrado + altoCuadrado / 2);
-                ctx.lineTo(x * anchoCuadrado + anchoCuadrado / 2, y * altoCuadrado + 5);
-                ctx.lineTo(x * anchoCuadrado + 5, y * altoCuadrado + altoCuadrado / 4);
-                ctx.fillStyle = "red";
-                ctx.fill();
-                ctx.fillStyle = "black";
-                ctx.fillRect(x * anchoCuadrado + anchoCuadrado / 2 - 1, y * altoCuadrado + 5, 2, altoCuadrado - 10);
-            }
-
-            function dibujarInterrogacion(x, y) {
-                dibujarFondoCuadrado(x, y, "#c0c0c0");
-                var anchoCuadrado = lienzo.width / ancho;
-                var altoCuadrado = lienzo.height / alto;
-
-                ctx.font = "bold 20px Comic Sans MS";
-                ctx.fillStyle = "black";
                 ctx.textAlign = "center";
-                ctx.fillText("?", x * anchoCuadrado + anchoCuadrado / 2, y * altoCuadrado + altoCuadrado / 2 + 7)
-
+                ctx.fillText(num, x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2 + 7)
             }
+        }
 
-        </script>
+        function dibujarBomba(x, y, num) {
+            dibujarFondoCuadrado(x, y, "#f2f2f2");
+            dibujarFormaBomba(x, y);
+        }
+
+        function dibujarUltimaBomba(x, y, num) {
+            dibujarFondoCuadrado(x, y, "#ff0000");
+            dibujarFormaBomba(x, y);
+        }
+
+        function dibujarFormaBomba(x, y) {
+            ctx.beginPath();
+            console.log(tamañoCuadrado / 4);
+            ctx.arc(x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2, tamañoCuadrado / 4, 0, 2 * Math.PI);
+            ctx.fillStyle = "black";
+            ctx.fill();
+        }
+
+        function dibujarFondoCuadrado(x, y, col) {
+            ctx.fillStyle = col;
+            ctx.fillRect(x * tamañoCuadrado, y * tamañoCuadrado, Math.trunc(tamañoCuadrado), Math.trunc(tamañoCuadrado));
+            ctx.fillStyle = "black";
+            ctx.strokeRect(x * tamañoCuadrado, y * tamañoCuadrado, Math.trunc(tamañoCuadrado), Math.trunc(tamañoCuadrado));
+        }
+
+        function dibujarBanderita(x, y) {
+            dibujarFondoCuadrado(x, y, "#c0c0c0");
+
+            ctx.beginPath();
+            ctx.moveTo(x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2);
+            ctx.lineTo(x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + 5);
+            ctx.lineTo(x * tamañoCuadrado + 5, y * tamañoCuadrado + tamañoCuadrado / 4);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.fillRect(x * tamañoCuadrado + tamañoCuadrado / 2 - 1, y * tamañoCuadrado + 5, 2, tamañoCuadrado - 10);
+        }
+
+        function dibujarInterrogacion(x, y) {
+            dibujarFondoCuadrado(x, y, "#c0c0c0");
+
+
+            ctx.font = "bold 20px Comic Sans MS";
+            ctx.fillStyle = "black";
+            ctx.textAlign = "center";
+            ctx.fillText("?", x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2 + 7)
+
+        }
+
+    </script>
 </body>
 
 </html>
