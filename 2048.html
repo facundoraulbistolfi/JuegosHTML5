@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width initial-scale=1.0">
+    <title>2048</title>
+
+</head>
+
+<body>
+    <style>
+        .center {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <div>
+
+        <div class="center">
+            <canvas id="lienzo" style="border: 2px solid black;" onclick="clickIzquierdo()"
+                oncontextmenu="clickDerecho();return false;">
+                Canvas element not supported.
+            </canvas>
+        </div>
+        <div class="center">
+            <button onclick="moverParaArriba()">Arriba</button>
+        </div>
+
+
+
+    </div>
+
+
+    <script>
+
+        //Constantes
+        const ARRIBA = 1;
+        const ABAJO = 2;
+        const IZQUIERDA = 3;
+        const DERECHA = 4;
+
+
+        var lienzo = document.getElementById("lienzo");
+        var ctx = lienzo.getContext('2d');
+
+        var mat = [];
+        var tamañoCuadrado = 50;
+        const tamMatriz = 4;
+
+        iniciar();
+
+        //FUNCIONES
+
+        function iniciar() {
+            //Creo la matriz y la inicializo con todos VACIO
+            for (var i = 0; i < tamMatriz; i++) {
+                mat[i] = new Array(tamMatriz);
+                for (var j = 0; j < tamMatriz; j++)
+                    mat[i][j] = 0;
+            }
+
+            lienzo.height = tamañoCuadrado * tamMatriz;
+            lienzo.width = tamañoCuadrado * tamMatriz;
+
+            dibujarPantalla();
+        }
+
+        function cambiarTamaño() {
+            dibujarPantalla();
+        }
+
+        function clickIzquierdo() {
+            var x = Math.trunc(tamMatriz * (event.clientX - lienzo.offsetLeft + document.body.scrollLeft) / lienzo.width);
+            var y = Math.trunc(tamMatriz * (event.clientY - lienzo.offsetTop + document.body.scrollTop) / lienzo.height);
+            if (x >= tamMatriz) x = tamMatriz - 1;
+            if (y >= tamMatriz) y = tamMatriz - 1;
+
+            mat[x][y] = (mat[x][y] == 0)? 2: mat[x][y] + mat[x][y];
+            dibujarPantalla();
+
+        }
+
+        function clickDerecho() {
+
+        }
+
+        //Funciones de dibujo
+        function dibujarPantalla() {
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, tamañoCuadrado * tamMatriz, tamañoCuadrado * tamMatriz);
+
+            for (var i = 0; i < tamMatriz; i++) {
+                for (var j = 0; j < tamMatriz; j++) {
+                    dibujarNumero(i, j, mat[i][j]);
+                }
+            }
+        }
+
+        function dibujarNumero(x, y, num) {
+            if (num == 0)
+                dibujarFondoCuadrado(x, y, "#c0c0c0");
+            else
+                dibujarFondoCuadrado(x, y, "#f2f2f2");
+
+            /*
+                        if (num > 0) {
+                            ctx.font = "bold " + tamañoCuadrado / 2 + "px Comic Sans MS";
+                            if (num == 1)
+                                ctx.fillStyle = "blue";
+                            else if (num == 2)
+                                ctx.fillStyle = "green";
+                            else if (num == 3)
+                                ctx.fillStyle = "red";
+                            else if (num == 4)
+                                ctx.fillStyle = "MidnightBlue";
+                            else if (num == 5)
+                                ctx.fillStyle = "Maroon";
+                            else if (num == 6)
+                                ctx.fillStyle = "Turquoise";
+                            else if (num == 7)
+                                ctx.fillStyle = "black";
+                            else ctx.fillStyle = "gray";*/
+
+            ctx.textAlign = "center";
+            ctx.fillText(num, x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2 + 7)
+
+        }
+
+        function moverParaArriba() {
+            for (var i = 1; i < tamMatriz; i++)
+                for (var y = 0; y < tamMatriz - i; y++)
+                    for (var x = 0; x < tamMatriz; x++) {
+
+                        if (mat[x][y] == mat[x][y + 1]) {
+                            mat[x][y] = mat[x][y] + mat[x][y + 1];
+                            mat[x][y + 1] = 0;
+                        }
+                        else if (mat[x][y] == 0) {
+                            mat[x][y] = mat[x][y + 1];
+                            mat[x][y + 1] = 0;
+                        }
+                        dibujarPantalla();
+                    }
+            
+            agregarNumRandom();
+            dibujarPantalla();
+
+        }
+
+        function agregarNumRandom(){
+            var i = 0;
+            while (i == 0) {
+                var x = Math.trunc(Math.random() * 100) % tamMatriz;
+                var y = Math.trunc(Math.random() * 100) % tamMatriz;
+                if (mat[x][y] == 0) {
+                    mat[x][y] = (Math.random() < 0.9)? 2:4;
+                    i++;
+                }
+            }
+        }
+
+        function dibujarFondoCuadrado(x, y, col) {
+            ctx.fillStyle = col;
+            ctx.fillRect(x * tamañoCuadrado, y * tamañoCuadrado, Math.trunc(tamañoCuadrado), Math.trunc(tamañoCuadrado));
+            ctx.fillStyle = "black";
+            ctx.strokeRect(x * tamañoCuadrado, y * tamañoCuadrado, Math.trunc(tamañoCuadrado), Math.trunc(tamañoCuadrado));
+        }
+
+    </script>
+</body>
+
+</html>
