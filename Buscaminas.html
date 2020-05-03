@@ -235,15 +235,12 @@
             switch (diff) {
                 case "1":
                     tamañoCuadrado = 25;
-
                     break;
                 case "2":
                     tamañoCuadrado = 30;
-
                     break;
                 case "3":
                     tamañoCuadrado = 50;
-
                     break;
             }
             lienzo.width = tamañoCuadrado * ancho;
@@ -346,11 +343,14 @@
             }
             window.clearInterval(timeout);
             dibujarCampo();
-            var nombre;
+
+            alert("Has ganado, tu puntuación: " + tiempo);
+            /*var nombre;
             prompt("Has ganado. \nTu puntuacion: " + tiempo + " \nIngresa tus siglas:", nombre);
             var dificultad = document.getElementById("dificultad").selectedIndex + 1;
             if (dificultad > 0 && dificultad <= 3)
                 guardarPuntuacion(nombre, tiempo, dificultad);
+            */
         }
 
         //Acciones principales
