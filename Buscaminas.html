@@ -100,15 +100,15 @@
                 <table class="center">
                     <tr>
                         <td>Alto:</td>
-                        <td><input type="number" min="1" max="100"></td>
+                        <td><input id="mdAncho" type="number" min="1" max="100"></td>
                     </tr>
                     <tr>
                         <td>Alto:</td>
-                        <td><input type="number" min="1" max="100"></td>
+                        <td><input id="mdAlto" type="number" min="1" max="100"></td>
                     </tr>
                     <tr>
-                        <td>Minas:</td>
-                        <td><input type="number" min="1" max="100"></td>
+                        <td>% Minas:</td>
+                        <td><input id="mdMinas" type="number" min="1" max="100"></td>
                     </tr>
                 </table>
                 <button onclick="modalAceptar()">Aceptar</button>
@@ -153,7 +153,7 @@
             window.clearInterval(timeout);
             tiempo = 0;
             mostrarTiempo();
-            timeout = window.setInterval(mostrarTiempo, 1000);
+            timeout = window.setInterval(mostrarTiempo, 10);
 
             lienzo.width = tamañoCuadrado * ancho;
             lienzo.height = tamañoCuadrado * alto;
@@ -178,12 +178,11 @@
                 }
             }
             document.getElementById("restMinas").innerText = cantBombas - cantBanderas;
-
             dibujarCampo();
         }
 
         function mostrarTiempo() {
-            document.getElementById("tiempo").innerHTML = tiempo;
+            document.getElementById("tiempo").innerHTML = tiempo / 100;
             tiempo += 1;
 
         }
@@ -197,26 +196,30 @@
                     ancho = 8; //x
                     alto = 8;  //y
                     cantBombas = 10;
+                    iniciar();
                     break;
                 case "2":
                     ancho = 16; //x
                     alto = 16;  //y
                     cantBombas = 40;
+                    iniciar();
                     break;
                 case "3":
                     ancho = 16; //x 16
                     alto = 30;  //y 30
                     cantBombas = 99; //99
+                    iniciar();
                     break;
                 case "4":
                     abrirModal();
                     break;
             }
-
-            iniciar();
         }
 
         function abrirModal() {
+            document.getElementById("mdAncho").value = ancho;
+            document.getElementById("mdAlto").value = alto;
+            document.getElementById("mdMinas").value = Math.trunc((cantBombas / (alto * ancho)) * 100);
             document.getElementById("myModal").style.display = "block";
         }
 
@@ -225,6 +228,11 @@
         }
 
         function modalAceptar() {
+            ancho = document.getElementById("mdAncho").value;
+            alto = document.getElementById("mdAlto").value;
+            cantBombas = Math.trunc((document.getElementById("mdMinas").value / (alto * ancho)) * 100);
+            cantBombas = (cantBombas > 0) ? cantBombas : 1;
+            iniciar();
             cerrarModal();
         }
 
@@ -344,7 +352,7 @@
             window.clearInterval(timeout);
             dibujarCampo();
 
-            alert("Has ganado, tu puntuación: " + tiempo);
+            alert("Has ganado, tu puntuación: " + tiempo / 100);
             /*var nombre;
             prompt("Has ganado. \nTu puntuacion: " + tiempo + " \nIngresa tus siglas:", nombre);
             var dificultad = document.getElementById("dificultad").selectedIndex + 1;
