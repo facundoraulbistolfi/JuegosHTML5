@@ -26,7 +26,9 @@
         <div class="center">
             <button onclick="moverParaArriba()">Arriba</button>
         </div>
-
+        <div class="center">
+            <button onclick="moverParaAbajo()">Abajo</button>
+        </div>
 
 
     </div>
@@ -43,7 +45,7 @@
 
         var lienzo = document.getElementById("lienzo");
         var ctx = lienzo.getContext('2d');
-
+        var score = 0;
         var mat = [];
         var tamañoCuadrado = 50;
         const tamMatriz = 4;
@@ -59,6 +61,8 @@
                 for (var j = 0; j < tamMatriz; j++)
                     mat[i][j] = 0;
             }
+
+            score = 0;
 
             lienzo.height = tamañoCuadrado * tamMatriz;
             lienzo.width = tamañoCuadrado * tamMatriz;
@@ -76,7 +80,7 @@
             if (x >= tamMatriz) x = tamMatriz - 1;
             if (y >= tamMatriz) y = tamMatriz - 1;
 
-            mat[x][y] = (mat[x][y] == 0)? 2: mat[x][y] + mat[x][y];
+            mat[x][y] = (mat[x][y] == 0) ? 2 : mat[x][y] + mat[x][y];
             dibujarPantalla();
 
         }
@@ -84,6 +88,81 @@
         function clickDerecho() {
 
         }
+
+
+        function moverParaArriba() {
+            for (var x = 0; x < tamMatriz; x++) {
+                for (var y = 0; y < tamMatriz; y++) {
+                    if (mat[x][y] == 0) {
+                        var i = y;
+                        while (i < tamMatriz - 1) {
+                            mat[x][i] = mat[x][i + 1];
+                        }
+                    }
+                }
+            }
+            recalcularEstado();
+        }
+
+        function moverParaAbajo() {
+            for (var i = 1; i < tamMatriz; i++) {
+                console.log(i);
+                for (var y = tamMatriz - 1; y >= i; y--) {
+                    console.log('y ' + y);
+                    for (var x = 0; x < tamMatriz; x++) {
+
+                        if (mat[x][y] == mat[x][y - 1]) {
+                            mat[x][y] = mat[x][y] + mat[x][y - 1];
+                            mat[x][y - 1] = 0;
+                        }
+                        else if (mat[x][y] == 0) {
+                            mat[x][y] = mat[x][y - 1];
+                            mat[x][y - 1] = 0;
+                        }
+                        dibujarPantalla();
+                    }
+                }
+
+            }
+            recalcularEstado();
+        }
+
+        function recalcularEstado() {
+
+            score = 0;
+            var quedaLugar = false;
+            for (var y = 0; y < tamMatriz; y++)
+                for (var x = 0; x < tamMatriz; x++) {
+                    score += mat[x][y];
+                    if (mat[x][y] == 0) quedaLugar = true;
+                }
+
+            if (!quedaLugar)
+                perdiste();
+            else {
+                //agregarNumRandom();
+                dibujarPantalla();
+            }
+
+        }
+
+        function perdiste() {
+            alert("Perdiste, tu score es de: " + score);
+            iniciar();
+        }
+
+        function agregarNumRandom() {
+            var i = 0;
+            while (i == 0) {
+                var x = Math.trunc(Math.random() * 100) % tamMatriz;
+                var y = Math.trunc(Math.random() * 100) % tamMatriz;
+                if (mat[x][y] == 0) {
+                    mat[x][y] = (Math.random() < 0.9) ? 2 : 4;
+                    i++;
+                }
+            }
+        }
+
 
         //Funciones de dibujo
         function dibujarPantalla() {
@@ -125,39 +204,6 @@
             ctx.textAlign = "center";
             ctx.fillText(num, x * tamañoCuadrado + tamañoCuadrado / 2, y * tamañoCuadrado + tamañoCuadrado / 2 + 7)
 
-        }
-
-        function moverParaArriba() {
-            for (var i = 1; i < tamMatriz; i++)
-                for (var y = 0; y < tamMatriz - i; y++)
-                    for (var x = 0; x < tamMatriz; x++) {
-
-                        if (mat[x][y] == mat[x][y + 1]) {
-                            mat[x][y] = mat[x][y] + mat[x][y + 1];
-                            mat[x][y + 1] = 0;
-                        }
-                        else if (mat[x][y] == 0) {
-                            mat[x][y] = mat[x][y + 1];
-                            mat[x][y + 1] = 0;
-                        }
-                        dibujarPantalla();
-                    }
-            
-            agregarNumRandom();
-            dibujarPantalla();
-
-        }
-
-        function agregarNumRandom(){
-            var i = 0;
-            while (i == 0) {
-                var x = Math.trunc(Math.random() * 100) % tamMatriz;
-                var y = Math.trunc(Math.random() * 100) % tamMatriz;
-                if (mat[x][y] == 0) {
-                    mat[x][y] = (Math.random() < 0.9)? 2:4;
-                    i++;
-                }
-            }
         }
 
         function dibujarFondoCuadrado(x, y, col) {
